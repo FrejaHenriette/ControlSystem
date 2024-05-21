@@ -1,34 +1,47 @@
+using ControlSystem.Application.DTOs;
+using ControlSystem.Application.Repositories;
 using ControlSystem.Application.Services;
 using ControlSystem.Domain.Entities;
 using ControlSystem.Domain.Repositories;
-using Moq;
+using ControlSystem.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using NSubstitute;
+using NSubstitute.Extensions;
 using Assert = Xunit.Assert;
 
 namespace ControlSystem.Tests;
 
 public class TransportOrderServiceTests
 {
+    private readonly ControlSystemDbContext _context;
+    private readonly TransportOrderRepository _repository;
+    
+    public TransportOrderServiceTests()
+    {
+        var options = new DbContextOptionsBuilder<ControlSystemDbContext>()
+            .UseInMemoryDatabase("testDb").Options;
+
+        _context = new ControlSystemDbContext(options);
+        _repository = new TransportOrderRepository(_context);
+    }
+    
     [Fact]
-    public async Task GetAllAsync_ReturnsAllTransportOrders()
+    public async Task SetStatusTransportOrder_ReturnsTransportOrder()
     {
         // Arrange
-        var mockMessageBrokerService = new Mock<IMessageBrokerService>();
-
-        var mockRepository = new Mock<ITransportOrderRepository>();
         var transportOrders = new List<TransportOrder>
         {
-            new TransportOrder { Id = 1, TransportOrderStatus = TransportOrderStatus.Delivered },
-            new TransportOrder { Id = 2, TransportOrderStatus = TransportOrderStatus.InTransit }
+            new TransportOrder { Id = 1, TransportOrderState = TransportOrderState.Delivered },
+            new TransportOrder { Id = 2, TransportOrderState = TransportOrderState.InTransit },
+            new TransportOrder { Id = 3, TransportOrderState = TransportOrderState.InTransit }
         };
-        mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(transportOrders);
-
-        var service = new TransportOrderService(mockRepository.Object, mockMessageBrokerService.Object);
+        var service = new TransportOrderService(_repository);
 
         // Act
-        var result = await service.GetAllAsync();
+        await service.SetState(2, "Delivered");
 
         // Assert
-        Assert.Equal(transportOrders, result);
+        Assert.Equal(TransportOrderState.Delivered, transportOrders[1].TransportOrderState);
     }
 
     // Add more tests for other methods of TransportOrderService
