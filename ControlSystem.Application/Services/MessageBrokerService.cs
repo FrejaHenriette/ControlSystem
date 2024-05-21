@@ -2,7 +2,7 @@ using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace ControlSystem.Services;
+namespace ControlSystem.Application.Services;
 
 public interface IMessageBrokerService : IDisposable
 {

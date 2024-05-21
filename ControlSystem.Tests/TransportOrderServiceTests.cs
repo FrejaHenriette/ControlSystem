@@ -1,10 +1,11 @@
-using Xunit;
+using ControlSystem.Application.Services;
+using ControlSystem.Domain.Entities;
+using ControlSystem.Domain.Repositories;
 using Moq;
-using ControlSystem.Models;
-using ControlSystem.Repository;
 using Assert = Xunit.Assert;
 
-namespace ControlSystem.Services;
+namespace ControlSystem.Tests;
+
 public class TransportOrderServiceTests
 {
     [Fact]
@@ -13,11 +14,11 @@ public class TransportOrderServiceTests
         // Arrange
         var mockMessageBrokerService = new Mock<IMessageBrokerService>();
 
-        var mockRepository = new Mock<IRepository<TransportOrder>>();
+        var mockRepository = new Mock<ITransportOrderRepository>();
         var transportOrders = new List<TransportOrder>
         {
-            new TransportOrder { Id = 1, Status = "Delivered" },
-            new TransportOrder { Id = 2, Status = "In Transit" }
+            new TransportOrder { Id = 1, TransportOrderStatus = TransportOrderStatus.Delivered },
+            new TransportOrder { Id = 2, TransportOrderStatus = TransportOrderStatus.InTransit }
         };
         mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(transportOrders);
 
